@@ -1,0 +1,6 @@
+persistence:
+  enabled: true
+  storageClassName: gp2  # <- switch from loki-gp3
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi

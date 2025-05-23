@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotrod
+  namespace: monitoring  # <- added this line
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hotrod
+  template:
+    metadata:
+      labels:
+        app: hotrod
+    spec:
+     containers:
+       - args:
+           - all
+         env:
+           - name: JAEGER_AGENT_HOST
+             value: tempo.monitoring.svc.cluster.local  # <- updated to use the Tempo service
+           - name: JAEGER_AGENT_PORT
+             value: '6831'
+           - name: JAEGER_SAMPLER_TYPE
+             value: const
+           - name: JAEGER_SAMPLER_PARAM
+             value: '1'
+         image: jaegertracing/example-hotrod:1.41.0
+         name: hotrod
+         ports:
+           - containerPort: 8080
+     restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotrod
+  namespace: monitoring  # <- added this line
+spec:
+  selector:
+    app: hotrod
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

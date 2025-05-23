@@ -1,0 +1,79 @@
+loki:
+  auth_enabled: false
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  storage_config:
+    aws:
+      region: us-east-1
+      bucketnames: seiright-loki-staging
+      s3forcepathstyle: false
+  pattern_ingester:
+    enabled: true
+  limits_config:
+    allow_structured_metadata: true
+    volume_enabled: true
+    retention_period: 672h # 28 days retention
+  querier:
+    max_concurrent: 4
+  storage:
+    type: s3
+    bucketNames:
+      chunks: seiright-loki-staging/chunks
+      ruler: seiright-loki-staging/ruler
+      admin: seiright-loki-staging/admin
+    s3:
+      endpoint: s3.us-east-1.amazonaws.com
+      region: us-east-1
+      signatureVersion: v4
+      s3ForcePathStyle: false
+      insecure: false
+      http_config: {}
+  ingester:
+    chunk_encoding: snappy
+
+deploymentMode: SimpleScalable
+
+backend:
+  replicas: 2
+
+read:
+  replicas: 2
+
+write:
+  replicas: 3
+
+minio:
+  enabled: false
+
+persistence:
+  enabled: true
+  storageClassName: gp2
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+gateway:
+  nginxConfig:
+    serverSnippet: |
+      proxy_set_header X-Scope-OrgID anonymous;
+
+      location ~ /loki/api/v1/query {
+        proxy_pass http://loki-read.monitoring.svc.cluster.local:3100;
+      }
+      location ~ /loki/api/v1/query_range {
+        proxy_pass http://loki-read.monitoring.svc.cluster.local:3100;
+      }
+      location ~ /loki/api/v1/labels {
+        proxy_pass http://loki-read.monitoring.svc.cluster.local:3100;
+      }
+      location ~ /loki/api/v1/series {
+        proxy_pass http://loki-read.monitoring.svc.cluster.local:3100;
+      }
+
