@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-ingress
+  namespace: monitoring
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:166560115894:certificate/20a7abc0-7533-4a15-8a55-b66797c0b43b
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10"
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/target-type: ip
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    app: kube-prometheus-stack-grafana
+    environment: monitoring
+spec:
+  ingressClassName: alb-internal
+  rules:
+    - host: monitoring.seiright.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - monitoring.seiright.com
