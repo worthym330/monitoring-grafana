@@ -1604,8 +1604,8 @@ storage:
       bucket: seiright-tempo-data
       region: us-east-1
       endpoint: s3.amazonaws.com
-      access_key: REMOVED
-      secret_key: REMOVED
+      access_key: AKAKSFDFHSMBVHH524
+      secret_key: A85ASDF566A6D5DSD6SD256SD1561616163
       # -- The S3 endpoint URL
     # The worker pool is used primarily when finding traces by id, but is also used by others.
     pool:
